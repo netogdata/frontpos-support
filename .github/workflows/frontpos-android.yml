@@ -5,6 +5,10 @@ name: FrontPOS Support Android
 on:
   workflow_dispatch:
 
+# Info : Udgivelsen "frontpos-test" kraever skriveadgang; organisationens standard er kun laesning.
+permissions:
+  contents: write
+
 jobs:
   android:
     uses: ./.github/workflows/flutter-build.yml
