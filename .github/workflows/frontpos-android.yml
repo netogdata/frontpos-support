@@ -1,0 +1,15 @@
+name: FrontPOS Support Android
+
+# FrontPOS Support (20. nov 2026): bygger kun Android-APK'erne med vores server/noegle (hbb_common-fork).
+# Startes manuelt; APK'erne laegges som artefakter og paa udgivelsen "frontpos-test".
+on:
+  workflow_dispatch:
+
+jobs:
+  android:
+    uses: ./.github/workflows/flutter-build.yml
+    secrets: inherit
+    with:
+      upload-artifact: true
+      upload-tag: "frontpos-test"
+      only-android: true
