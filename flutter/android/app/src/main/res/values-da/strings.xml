@@ -1,0 +1,3 @@
+<resources>
+    <string name="accessibility_service_description">Lader FrontPOS-support trykke og skrive på denne enhed under en supportsession. Bruges ikke, når der ikke er en session.</string>
+</resources>
