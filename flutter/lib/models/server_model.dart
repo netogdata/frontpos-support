@@ -402,11 +402,13 @@ class ServerModel with ChangeNotifier {
       }
     } else {
       if (isAndroid) {
+        // FrontPOS Support: ingen mappevalg - appens egen mappe bruges altid, uden at spoerge.
         try {
-          await AndroidDocuments.requireLogFolder();
-          await showAndroidFileTransferSetup(gFFI);
+          await AndroidDocuments.workspace(share: true);
+          await bind.setLocalFlutterOption(
+              k: 'android-file-transfer-folder-setup', v: 'Y');
         } catch (_) {
-          debugPrint('Folder setup failed; continuing service startup');
+          debugPrint('Workspace setup failed; continuing service startup');
         }
       }
       await checkRequestNotificationPermission();
