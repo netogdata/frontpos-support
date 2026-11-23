@@ -47,6 +47,12 @@ class HomePageState extends State<HomePage> {
 
   void initPages() {
     _pages.clear();
+    // FrontPOS Support: kunden ser kun supportsiden; indstillinger ligger bag tandhjulet i toppen.
+    if (isAndroid) {
+      _chatPageTabIndex = -1;
+      _pages.add(ServerPage());
+      return;
+    }
     if (!bind.isIncomingOnly()) {
       _pages.add(ConnectionPage(
         appBarActions: [],
@@ -77,9 +83,22 @@ class HomePageState extends State<HomePage> {
           appBar: AppBar(
             centerTitle: true,
             title: appTitle(),
-            actions: _pages.elementAt(_selectedIndex).appBarActions,
+            actions: [
+              ..._pages.elementAt(_selectedIndex).appBarActions,
+              if (isAndroid)
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  tooltip: translate('Settings'),
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => Scaffold(
+                              appBar: AppBar(title: Text(translate('Settings'))),
+                              body: SettingsPage()))),
+                ),
+            ],
           ),
-          bottomNavigationBar: BottomNavigationBar(
+          bottomNavigationBar: _pages.length < 2 ? null : BottomNavigationBar(
             key: navigationBarKey,
             items: _pages
                 .map((page) =>

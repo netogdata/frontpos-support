@@ -24,11 +24,9 @@ class ServerPage extends StatefulWidget implements PageShape {
   @override
   final icon = const Icon(Icons.mobile_screen_share);
 
+  // FrontPOS Support: ingen menu med adgangskode/godkendelse – den faste adgangskode styres fra backoffice.
   @override
-  final appBarActions = (!bind.isDisableSettings() &&
-          bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) != 'Y')
-      ? [_DropDownAction()]
-      : [];
+  final appBarActions = <Widget>[];
 
   ServerPage({Key? key}) : super(key: key);
 
@@ -648,6 +646,8 @@ class _PermissionCheckerState extends State<PermissionChecker> {
             serverModel.inputOk,
             serverModel.toggleInput,
           ),
+          // FrontPOS Support: kun det noedvendige for kunden; resten er sat som standard.
+          if (kFrontPosShowAdvancedPermissions) ...[
           PermissionRow(
             translate("Transfer file"),
             serverModel.fileOk,
@@ -685,9 +685,13 @@ class _PermissionCheckerState extends State<PermissionChecker> {
             serverModel.toggleClipboard,
             enabled: !permissionChangeLocked,
           ),
+          ],
         ]));
   }
 }
+
+/// FrontPOS Support: filoverfoersel, lyd og udklipsholder vises ikke for kunden.
+const kFrontPosShowAdvancedPermissions = false;
 
 class PermissionRow extends StatelessWidget {
   const PermissionRow(this.name, this.isOk, this.onPressed,
