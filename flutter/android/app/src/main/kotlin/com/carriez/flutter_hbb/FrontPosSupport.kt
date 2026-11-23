@@ -161,7 +161,9 @@ object FrontPosSupport {
             val body = JSONObject()
                 .put("rustdeskId", id)
                 .put("inputEnabled", InputService.isOpen)
-                .put("sharing", MainService.isStart)
+                // Note : isReady = skaermoptagelsen er tilladt og klar (som "Skaermoptagelse" i appen); isStart er
+                //        foerst sand, naar nogen er forbundet og billeder sendes.
+                .put("sharing", MainService.isReady)
                 .put("appVersion", appVersion(ctx))
                 .put("passwordVersion", passwordVersion)
             val (status, json) = post("$API/heartbeat", body, token)

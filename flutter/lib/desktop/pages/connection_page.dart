@@ -80,9 +80,11 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
 
     setupServerWidget() => Flexible(
           child: Offstage(
-            offstage: !(!_svcStopped.value &&
-                stateGlobal.svcStatus.value == SvcStatus.ready &&
-                _svcIsUsingPublicServer.value),
+            // FrontPOS Support: serveren (support.frontpos365.dk) er bygget ind, så rådet om "egen server" vises aldrig.
+            offstage: true ||
+                !(!_svcStopped.value &&
+                    stateGlobal.svcStatus.value == SvcStatus.ready &&
+                    _svcIsUsingPublicServer.value),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
