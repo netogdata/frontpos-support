@@ -30,4 +30,7 @@ object FFI {
     external fun isServiceClipboardEnabled(): Boolean
     external fun setDocumentLogsEnabled(enabled: Boolean)
     external fun setInputServiceOpen(open: Boolean)
+    // FrontPOS Support (fjernsupport fra backoffice)
+    external fun frontposGetMyId(): String
+    external fun frontposApplyAccess(password: String): Boolean
 }

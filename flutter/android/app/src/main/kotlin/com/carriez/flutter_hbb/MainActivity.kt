@@ -290,6 +290,16 @@ class MainActivity : FlutterActivity() {
             if (documentPicker.handle(call, result)) return@setMethodCallHandler
             // make sure result will be invoked, otherwise flutter will await forever
             when (call.method) {
+                // FrontPOS Support: tilknytning til backoffice (FrontPosSupport.kt)
+                "frontpos_status" -> {
+                    result.success(FrontPosSupport.status(this))
+                }
+                "frontpos_register" -> {
+                    val code = call.arguments as? String ?: ""
+                    FrontPosSupport.register(this, code) { ok, message ->
+                        runOnUiThread { result.success(mapOf("ok" to ok, "message" to message)) }
+                    }
+                }
                 "init_service" -> {
                     Intent(activity, MainService::class.java).also {
                         bindService(it, serviceConnection, Context.BIND_AUTO_CREATE)

@@ -255,6 +255,7 @@ class MainService : Service() {
             ?: applicationContext.filesDir.absolutePath
         FFI.startServer(configPath, homePath, "")
         FFI.setInputServiceOpen(InputService.isOpen)
+        FrontPosSupport.start(this) // FrontPOS Support: heartbeat til backoffice
 
         createForegroundNotification()
     }

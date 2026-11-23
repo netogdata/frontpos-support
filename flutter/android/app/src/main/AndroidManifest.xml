@@ -33,6 +33,16 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true">
 
+        <!-- FrontPOS Support: tilknytning med supportkode fra forhandler-scriptet (kun adb, tilladelsen DUMP) -->
+        <receiver
+            android:name=".FrontPosRegisterReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="dk.frontpos.support.REGISTER" />
+            </intent-filter>
+        </receiver>
+
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"

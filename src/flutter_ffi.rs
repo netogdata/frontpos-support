@@ -3191,6 +3191,57 @@ pub mod server_side {
         jboolean::from(crate::server::is_clipboard_service_ok())
     }
 
+    /// FrontPOS Support: the device's ID, for registration and heartbeat from MainService (no Flutter UI after boot).
+    #[no_mangle]
+    pub unsafe extern "system" fn Java_ffi_FFI_frontposGetMyId(env: JNIEnv, _class: JClass) -> jstring {
+        let id = if config::APP_DIR.read().unwrap().is_empty() {
+            "".to_owned()
+        } else {
+            super::main_get_my_id()
+        };
+        return env.new_string(id).unwrap_or_default().into_raw();
+    }
+
+    /// FrontPOS Support: fixed password from the backoffice, accepted without the "Accept" dialog on the device
+    /// (verification-method = permanent password, approve-mode = password).
+    #[no_mangle]
+    pub unsafe extern "system" fn Java_ffi_FFI_frontposApplyAccess(
+        env: JNIEnv,
+        _class: JClass,
+        password: JString,
+    ) -> jboolean {
+        if config::APP_DIR.read().unwrap().is_empty() {
+            return jboolean::from(false);
+        }
+        let mut env = env;
+        let password: String = match env.get_string(&password) {
+            Ok(p) => p.into(),
+            Err(_) => return jboolean::from(false),
+        };
+        if password.is_empty() {
+            return jboolean::from(false);
+        }
+        // Note : false also means "already this password" (nothing changed), which is fine; only a locked
+        //        password is a real failure (other errors are logged by the setter).
+        if !crate::ui_interface::set_permanent_password_with_result(password)
+            && config::Config::is_disable_change_permanent_password()
+        {
+            log::error!("FrontPOS Support: permanent password cannot be changed");
+            return jboolean::from(false);
+        }
+        let mut ok = true;
+        for (key, value) in [
+            ("verification-method", "use-permanent-password"),
+            ("approve-mode", "password"),
+        ] {
+            if let Err(e) = super::main_set_option(key.to_owned(), value.to_owned()) {
+                log::error!("FrontPOS Support: failed to set {}: {}", key, e);
+                ok = false;
+            }
+        }
+        jboolean::from(ok)
+    }
+
     /// Keeps `enable-keyboard` in step with InputService when the Flutter UI is not running.
     #[no_mangle]
     pub unsafe extern "system" fn Java_ffi_FFI_setInputServiceOpen(
