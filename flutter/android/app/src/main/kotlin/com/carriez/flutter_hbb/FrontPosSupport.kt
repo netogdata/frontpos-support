@@ -1,10 +1,13 @@
 package com.carriez.flutter_hbb
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import ffi.FFI
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -23,6 +26,7 @@ import java.net.URL
 object FrontPosSupport {
     private const val TAG = "FrontPosSupport"
     private const val API = "https://api.frontpos365.dk/api/public/remote_support"
+    const val ACTION_LINK = "dk.frontpos.support.LINK"
     private const val PREFS = "frontpos_support"
     private const val INTERVAL_MS = 5 * 60 * 1000L
     private const val FIRST_DELAY_MS = 20 * 1000L
@@ -82,8 +86,33 @@ object FrontPosSupport {
         }
     }
 
+    /**
+     * FrontPOS-appen paa kassen aabner os med handlingen dk.frontpos.support.LINK og kassens supportkode
+     * (backoffice: Kasser -> Fjernsupport -> Installer). Tilknytningen sker i baggrunden; resultatet vises som toast.
+     */
+    fun linkFromIntent(context: Context, intent: Intent?) {
+        if (intent?.action != ACTION_LINK) return
+        val code = intent.getStringExtra("code")?.trim().orEmpty()
+        intent.action = null // ikke igen ved genskabelse af aktiviteten
+        if (code.isEmpty()) return
+        val ctx = context.applicationContext
+        register(ctx, code) { ok, message ->
+            Log.i(TAG, "link from FrontPOS app: ok=$ok $message")
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(ctx, "FrontPOS Support: $message", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun registerNow(ctx: Context, code: String): Pair<Boolean, String> {
-        val id = FFI.frontposGetMyId()
+        // Lige efter installationen er opsaetningen (og dermed ID'et) ikke klar foer Flutter-delen har startet.
+        var id = FFI.frontposGetMyId()
+        var waited = 0
+        while (id.isBlank() && waited < 30) {
+            Thread.sleep(1000)
+            waited++
+            id = FFI.frontposGetMyId()
+        }
         if (id.isBlank()) {
             return false to "FrontPOS Support er ikke klar endnu. Tryk Start under Del skærmen og prøv igen."
         }
