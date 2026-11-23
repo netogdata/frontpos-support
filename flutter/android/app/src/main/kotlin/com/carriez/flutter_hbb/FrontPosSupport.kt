@@ -38,6 +38,8 @@ object FrontPosSupport {
     private const val KEY_PASSWORD_VERSION = "password_version"
     private const val KEY_LAST_OK = "last_ok"
     private const val KEY_LAST_ERROR = "last_error"
+    /** ID'et, adgangskoden sidst blev sat paa; et andet ID = ny/nulstillet opsaetning, saa koden hentes igen. */
+    private const val KEY_APPLIED_ID = "applied_id"
 
     private val thread = HandlerThread("FrontPosSupport").apply { start() }
     private val handler = Handler(thread.looper)
@@ -137,6 +139,7 @@ object FrontPosSupport {
             .putString(KEY_TENANT, json.optString("tenantName"))
             .putString(KEY_NAME, json.optString("name"))
             .putInt(KEY_PASSWORD_VERSION, json.getInt("passwordVersion"))
+            .putString(KEY_APPLIED_ID, id)
             .putLong(KEY_LAST_OK, System.currentTimeMillis())
             .remove(KEY_LAST_ERROR)
             .apply()
@@ -150,12 +153,17 @@ object FrontPosSupport {
         val prefs = prefs(ctx)
         val token = prefs.getString(KEY_TOKEN, null) ?: return
         try {
+            val id = FFI.frontposGetMyId()
+            val appliedId = prefs.getString(KEY_APPLIED_ID, null)
+            // Note : Ny opsaetning (fx nyt appnavn eller slettede data) har ikke den faste kode: bed om den igen.
+            val passwordVersion = if (id.isNotBlank() && appliedId != id) 0
+                else prefs.getInt(KEY_PASSWORD_VERSION, 0)
             val body = JSONObject()
-                .put("rustdeskId", FFI.frontposGetMyId())
+                .put("rustdeskId", id)
                 .put("inputEnabled", InputService.isOpen)
                 .put("sharing", MainService.isStart)
                 .put("appVersion", appVersion(ctx))
-                .put("passwordVersion", prefs.getInt(KEY_PASSWORD_VERSION, 0))
+                .put("passwordVersion", passwordVersion)
             val (status, json) = post("$API/heartbeat", body, token)
             if (status == 401 && json?.optBoolean("removed") == true) {
                 // Fjernet i backoffice: glem tilknytningen; enheden skal have en ny supportkode.
@@ -173,7 +181,7 @@ object FrontPosSupport {
                 .putString(KEY_TENANT, json.optString("tenantName"))
                 .putString(KEY_NAME, json.optString("name"))
             if (json.has("password") && FFI.frontposApplyAccess(json.getString("password"))) {
-                edit.putInt(KEY_PASSWORD_VERSION, json.getInt("passwordVersion"))
+                edit.putInt(KEY_PASSWORD_VERSION, json.getInt("passwordVersion")).putString(KEY_APPLIED_ID, id)
                 Log.d(TAG, "new password applied (version ${json.getInt("passwordVersion")})")
             }
             edit.apply()
