@@ -479,9 +479,14 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           sed -i '/dpiAware/d' res/manifest.xml
+          # FrontPOS Support: installationen kopierer mappen uaendret og starter <APP_NAME>.exe bagefter, saa
+          # programfilen i pakken skal hedde FrontPOS-Support.exe (paa en kopi, MSI-trinnet bruger ./rustdesk).
+          rm -rf ./frontpos-portable
+          cp -r ./rustdesk ./frontpos-portable
+          mv ./frontpos-portable/rustdesk.exe ./frontpos-portable/FrontPOS-Support.exe
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
+          python3 ./generate.py -f ../../frontpos-portable/ -o . -e ../../frontpos-portable/FrontPOS-Support.exe
           popd
           mkdir -p ./SignOutput
           mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
