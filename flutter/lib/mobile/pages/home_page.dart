@@ -169,7 +169,7 @@ class HomePageState extends State<HomePage> {
         ],
       );
     }
-    return Text(bind.mainGetAppNameSync());
+    return Text(bind.mainGetAppNameSync().replaceAll('-', ' ')); // FrontPOS Support: vis "FrontPOS Support"
   }
 }
 
