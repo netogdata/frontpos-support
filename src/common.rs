@@ -2474,6 +2474,11 @@ pub fn frontpos_quick_support() {
         .write()
         .unwrap()
         .insert("conn-type".to_owned(), "incoming".to_owned());
+    // Info : Intet "installere"-felt (24. nov 2026): QuickSupport-kunder skal ikke installere noget.
+    config::HARD_SETTINGS
+        .write()
+        .unwrap()
+        .insert("disable-installation".to_owned(), "Y".to_owned());
 }
 
 pub fn using_public_server() -> bool {
