@@ -2466,6 +2466,19 @@ pub fn create_symmetric_key_msg(their_pk_b: [u8; 32]) -> (Bytes, Bytes, secretbo
 }
 
 #[inline]
+/// FrontPOS Support QuickSupport (FrontPOS-Support-QS-*.exe, til kunder på det gamle FrontPOS): kun det lille vindue med
+/// ID'et, ingen udgående forbindelser, og kunden godkender hver forbindelse med Accepter (ingen adgangskode).
+pub fn frontpos_quick_support() {
+    config::HARD_SETTINGS
+        .write()
+        .unwrap()
+        .insert("conn-type".to_owned(), "incoming".to_owned());
+    config::OVERWRITE_SETTINGS
+        .write()
+        .unwrap()
+        .insert("approve-mode".to_owned(), "click".to_owned());
+}
+
 pub fn using_public_server() -> bool {
     crate::get_custom_rendezvous_server(get_option("custom-rendezvous-server")).is_empty()
 }
