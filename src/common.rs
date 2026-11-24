@@ -2467,16 +2467,13 @@ pub fn create_symmetric_key_msg(their_pk_b: [u8; 32]) -> (Bytes, Bytes, secretbo
 
 #[inline]
 /// FrontPOS Support QuickSupport (FrontPOS-Support-QS-*.exe, til kunder på det gamle FrontPOS): kun det lille vindue med
-/// ID'et, ingen udgående forbindelser, og kunden godkender hver forbindelse med Accepter (ingen adgangskode).
+/// ID og engangskode, ingen udgående forbindelser. Godkendelse som RustDesks standard: engangskoden (fx efter fyraften
+/// via et skærmbillede) eller Accepter på skærmen.
 pub fn frontpos_quick_support() {
     config::HARD_SETTINGS
         .write()
         .unwrap()
         .insert("conn-type".to_owned(), "incoming".to_owned());
-    config::OVERWRITE_SETTINGS
-        .write()
-        .unwrap()
-        .insert("approve-mode".to_owned(), "click".to_owned());
 }
 
 pub fn using_public_server() -> bool {
