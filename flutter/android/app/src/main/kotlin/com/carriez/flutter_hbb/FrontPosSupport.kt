@@ -97,11 +97,18 @@ object FrontPosSupport {
         val code = intent.getStringExtra("code")?.trim().orEmpty()
         intent.action = null // ikke igen ved genskabelse af aktiviteten
         if (code.isEmpty()) return
+        // Info : Automatisk tilknytning fra kasseappen (24. nov 2026, "background"): naar det er gjort, gaar vi tilbage
+        //        til kassen, saa personalet ikke staar i FrontPOS Support efter parringen.
+        val background = intent.getBooleanExtra("background", false)
+        val activity = context as? android.app.Activity
         val ctx = context.applicationContext
         register(ctx, code) { ok, message ->
-            Log.i(TAG, "link from FrontPOS app: ok=$ok $message")
+            Log.i(TAG, "link from FrontPOS app: ok=$ok background=$background $message")
             Handler(Looper.getMainLooper()).post {
                 Toast.makeText(ctx, "FrontPOS Support: $message", Toast.LENGTH_LONG).show()
+                if (background && activity != null && !activity.isFinishing) {
+                    activity.moveTaskToBack(true)
+                }
             }
         }
     }
