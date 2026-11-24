@@ -93,6 +93,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="rustdesk" />
             </intent-filter>
+
+            <!-- FrontPOS: tilknytning fra kasseappen (FrontPosSupport.linkFromIntent). Nyere Android afviser en
+                 eksplicit intent med en handling, aktiviteten ikke har erklaeret (24. nov 2026, LANDI). -->
+            <intent-filter>
+                <action android:name="dk.frontpos.support.LINK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity
