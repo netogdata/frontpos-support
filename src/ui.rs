@@ -173,6 +173,9 @@ pub fn start(args: &mut [String]) {
         } else {
             inline::get_remote()
         };
+        // FrontPOS (25. nov 2026): UTF-8-BOM foran, ellers laeser Sciter siden som Latin-1, og ae/oe/aa i vores egne
+        // tekster (QuickSupport-vinduet) bliver forkerte. RustDesks egne tekster kommer fra translate() og er ikke ramt.
+        let html = format!("\u{feff}{}", html);
         frame.load_html(html.as_bytes(), Some(page));
     }
     #[cfg(not(feature = "inline"))]
