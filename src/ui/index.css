@@ -439,3 +439,11 @@ textarea.grey-text {
         font-size: 1em;
     }
 }
+/* FrontPOS QuickSupport (25. nov 2026): som TeamViewer QuickSupport - stort ID og stor engangskode. */
+.frontpos-qs .left-pane > div:nth-child(1) { padding: 16px 20px 60px 20px; }
+.frontpos-qs .title { font-size: 1.3em; font-weight: bold; }
+.frontpos-qs .lighter-text { font-size: 1em; }
+.frontpos-qs .your-desktop { border-left: #1565c0 solid 3px; padding-left: 0.8em; margin-top: 0.6em; }
+.frontpos-qs .your-desktop input[type=text] { font-size: 1.9em; height: 1.4em; font-weight: bold; color: #222; }
+.frontpos-qs .your-desktop > div { color: #555; font-weight: bold; }
+.frontpos-qs div.connect-status { padding: 0.8em 1em; }

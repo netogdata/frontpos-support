@@ -4,7 +4,9 @@ stdout.println("is_xfce: ", is_xfce);
 
 // See default height in common.tis `msgbox()`.
 const msgbox_default_height = 180;
-const incoming_only_width = 180;
+// FrontPOS QuickSupport (25. nov 2026): bredere vindue, saa teksterne ikke loeber ind i hinanden.
+const incoming_only_width = handler.is_incoming_only() && handler.is_disable_installation() ? 320 : 180;
+const frontpos_qs_height = 440;
 
 const outgoing_only = handler.is_outgoing_only();
 const incoming_only = handler.is_incoming_only();
@@ -27,7 +29,7 @@ const disable_change_id = handler.get_builtin_option("disable-change-id") == "Y"
 // html min-width, min-height not working on mac, below works for all
 // Sciter applies Windows DPI scaling to these minimum dimensions.
 if (incoming_only) {
-  view.windowMinSize = (incoming_only_width, (handler.is_installed() || disable_installation) ? 300 : 390);
+  view.windowMinSize = (incoming_only_width, frontpos_qs ? frontpos_qs_height : (handler.is_installed() || disable_installation) ? 300 : 390);
 } else {
   view.windowMinSize = (560, 300);
 }
@@ -89,7 +91,8 @@ class ConnectStatus: Reactor.Component {
         } else if (connect_status == 0) {
             return translate('connecting_status');
         }
-        if (!handler.using_public_server()) return translate('Ready');
+        // FrontPOS: egen server (indbygget), saa intet "opsaet din egen server"-link.
+        if (frontpos_qs || !handler.using_public_server()) return translate('Ready');
         return <span>{translate("Ready")}, <span .link #setup-server>{translate("setup_server_tip")}</span></span>;
     }
 
@@ -720,16 +723,16 @@ class App: Reactor.Component
         var show_install_daemon = is_win && !disable_installation && !outgoing_only && !service_stopped &&
             handler.is_installed() && !handler.is_installed_daemon(false);
         return
-            <div .app>
+            <div class={"app" + (frontpos_qs ? " frontpos-qs" : "")}>
                     <div .left-pane style={incoming_only ? "width:*" : ""}>
                     <div>
                         {frontpos_qs ? <img src={frontpos_logo} style="width:*; max-width:100%; height:auto; margin-bottom:8px" /> : ""}
                         {is_custom_client && handler.get_builtin_option("hide-powered-by-me") != "Y" ? <div .link #powered-by style="opacity:0.5;font-size:0.8em;text-decoration:underline">{translate('powered_by_me')}</div> : ""}
                         <div .title style="flow:horizontal; position:relative; height:1.6em; line-height:1.6em">
-                            <span>{translate('Your Desktop')}</span>
+                            <span>{frontpos_qs ? "Tillad fjernstyring" : translate('Your Desktop')}</span>
                             {outgoing_only ? <span .link #open-settings style="position:absolute; right:0; bottom:0; transform:scale(0.6); transform-origin:right bottom; opacity:0.85">{svg_menu}</span> : ""}
                         </div>
-                        <div .lighter-text>{outgoing_only ? translate('outgoing_only_desk_tip') : translate('desk_tip')}</div>
+                        <div .lighter-text>{frontpos_qs ? "Oplys ID og engangskode til FrontPOS for at få hjælp." : outgoing_only ? translate('outgoing_only_desk_tip') : translate('desk_tip')}</div>
                         {outgoing_only ? <div style="position:absolute; left:-10000px; top:-10000px; width:0; height:0; overflow:hidden"><MyIdMenu /></div> : ""}
                         {!outgoing_only && <div .your-desktop>
                             <MyIdMenu />
@@ -1393,7 +1396,10 @@ function self.closing() {
 
 function self.ready() {
     var r = handler.get_size();
-    if (isReasonableSize(r) && r[2] > 0) {
+    if (frontpos_qs) {
+        // FrontPOS QuickSupport: altid samme stoerrelse midt paa skaermen (ikke sidste stoerrelse).
+        centerize(scaleIt(incoming_only_width), scaleIt(frontpos_qs_height));
+    } else if (isReasonableSize(r) && r[2] > 0) {
         var (sx, sy, sw, sh) = view.screenBox(#workarea, #rectw);
         if (r[2] >= sw && r[3] >= sh) {
             self.timer(1ms, function() { view.windowState = View.WINDOW_MAXIMIZED; });
