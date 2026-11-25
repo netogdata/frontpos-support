@@ -783,9 +783,10 @@ jobs:
           pushd ./libs/portable
           pip3 install -r requirements.txt
           # FrontPOS Support: programfilen i pakken hedder FrontPOS-Support.exe, som i Flutter-udgaven.
-          rm -rf ./frontpos-portable
-          cp -r ./Release ./frontpos-portable
-          mv ./frontpos-portable/rustdesk.exe ./frontpos-portable/FrontPOS-Support.exe
+          # Note : Her staar vi i ./libs/portable (pushd ovenfor).
+          rm -rf ../../frontpos-portable
+          cp -r ../../Release ../../frontpos-portable
+          mv ../../frontpos-portable/rustdesk.exe ../../frontpos-portable/FrontPOS-Support.exe
           python3 ./generate.py -f ../../frontpos-portable/ -o . -e ../../frontpos-portable/FrontPOS-Support.exe
           popd
           mkdir -p ./SignOutput
