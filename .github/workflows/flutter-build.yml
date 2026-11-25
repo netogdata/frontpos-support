@@ -597,7 +597,8 @@ jobs:
 
   # The fallback for the flutter version, we use Sciter for 32bit Windows.
   build-for-windows-sciter:
-    if: ${{ !inputs.only-android && !inputs.only-windows }}
+    # FrontPOS (25. nov 2026): ogsaa i "FrontPOS Support Windows" (only-windows), til QuickSupport paa Windows 7/8 (32-bit).
+    if: ${{ !inputs.only-android }}
     name: ${{ matrix.job.target }} (${{ matrix.job.os }})
     needs: [validate-update-metadata-keys]
     runs-on: ${{ matrix.job.os }}
@@ -781,7 +782,11 @@ jobs:
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../Release/ -o . -e ../../Release/rustdesk.exe
+          # FrontPOS Support: programfilen i pakken hedder FrontPOS-Support.exe, som i Flutter-udgaven.
+          rm -rf ./frontpos-portable
+          cp -r ./Release ./frontpos-portable
+          mv ./frontpos-portable/rustdesk.exe ./frontpos-portable/FrontPOS-Support.exe
+          python3 ./generate.py -f ../../frontpos-portable/ -o . -e ../../frontpos-portable/FrontPOS-Support.exe
           popd
           mkdir -p ./SignOutput
           mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}-sciter.exe
