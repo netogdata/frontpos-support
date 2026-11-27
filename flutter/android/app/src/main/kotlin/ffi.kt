@@ -33,4 +33,5 @@ object FFI {
     // FrontPOS Support (fjernsupport fra backoffice)
     external fun frontposGetMyId(): String
     external fun frontposApplyAccess(password: String): Boolean
+    external fun frontposCloseConnection(connId: Int)
 }

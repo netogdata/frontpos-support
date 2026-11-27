@@ -132,6 +132,10 @@ class MainService : Service() {
                             startCapture()
                         }
                         onClientAuthorizedNotification(id, type, username, peerId)
+                        // FrontPOS: supportikonet vises, mens en supporter er paa skaermen.
+                        if (!isFileTransfer) {
+                            FrontPosSessionBadge.onClientAuthorized(this, id, if (username.isNotBlank()) username else peerId)
+                        }
                     } else {
                         loginRequestNotification(id, type, username, peerId)
                     }
@@ -165,6 +169,10 @@ class MainService : Service() {
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
+            }
+            "remove_connection" -> {
+                // FrontPOS: supporteren er gaaet -> fjern supportikonet (naar der ikke er flere).
+                arg1.toIntOrNull()?.let { FrontPosSessionBadge.onClientRemoved(this, it) }
             }
             "stop_capture" -> {
                 Log.d(logTag, "from rust:stop_capture")

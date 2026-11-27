@@ -3204,6 +3204,16 @@ pub mod server_side {
 
     /// FrontPOS Support: fixed password from the backoffice, accepted without the "Accept" dialog on the device
     /// (verification-method = permanent password, approve-mode = password).
+    /// FrontPOS: afbryd en indkommende supportforbindelse (knappen "Afbryd" ved supportikonet).
+    #[no_mangle]
+    pub unsafe extern "system" fn Java_ffi_FFI_frontposCloseConnection(
+        _env: JNIEnv,
+        _class: JClass,
+        conn_id: jni::sys::jint,
+    ) {
+        crate::ui_cm_interface::close(conn_id as i32);
+    }
+
     #[no_mangle]
     pub unsafe extern "system" fn Java_ffi_FFI_frontposApplyAccess(
         env: JNIEnv,
