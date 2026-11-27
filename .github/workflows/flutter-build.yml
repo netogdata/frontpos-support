@@ -1891,9 +1891,25 @@ jobs:
           # build flutter
           pushd flutter
           flutter build apk "--${{ env.reltype }}" --target-platform android-arm64,android-arm,android-x64${{ env.x86_target }}
+          # FrontPOS (27. nov 2026): ogsaa en .aab til Google Play; den signeres lokalt med FrontPOS' 9C:50-noegle.
+          if [ "${{ env.reltype }}" = "release" ]; then
+            flutter build appbundle --release --target-platform android-arm64,android-arm,android-x64
+          fi
           popd
           mkdir -p signed-apk
           mv ./flutter/build/app/outputs/flutter-apk/app-${{ env.reltype }}.apk signed-apk/rustdesk-${{ env.VERSION }}-universal${{ env.suffix }}.apk
+          if [ -f ./flutter/build/app/outputs/bundle/release/app-release.aab ]; then
+            mkdir -p play-aab
+            mv ./flutter/build/app/outputs/bundle/release/app-release.aab play-aab/frontpos-support-${{ env.VERSION }}.aab
+          fi
+
+      - name: Upload Play bundle (FrontPOS)
+        if: env.UPLOAD_ARTIFACT == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontpos-support-${{ env.VERSION }}.aab
+          path: play-aab/
+          if-no-files-found: warn
 
       # https://github.com/r0adkll/sign-android-release/issues/84#issuecomment-1889636075
       - name: Setup sign tool version variable
